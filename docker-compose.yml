@@ -8,9 +8,7 @@ services:
         env_file: .env
         ports:
             - "2222:22"
-
         volumes:
-            - repos:/var/repo
             - www:/var/www
 
     nginx:
@@ -18,7 +16,7 @@ services:
         depends_on:
             - git-server
         ports:
-            - "8080:80" # Public HTTP
+            - "8080:80"
         volumes:
             - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
             - www:/var/www
@@ -34,5 +32,4 @@ services:
         - 4040:4040
 
 volumes:
-    repos:
     www:
