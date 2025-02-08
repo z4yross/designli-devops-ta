@@ -28,7 +28,7 @@ The Git server is a simple NodeJS server that listens for incoming Git pushes an
 
 The `post-receive` hook is located in `server/post-receive`. This script is executed when a push is made to the Git server. The script checks that the pushed branch is `main` and then proceeds to install the dependencies and build the React application, placing the build files in the shared volume with the Nginx server.
 
-> [!INFO]
+> [!NOTE]
 > The environment variable GIT_PASSWORD must be set to use the remote Git repository.
 
 ### Nginx Server
@@ -41,7 +41,7 @@ The Ngrok service is a tunneling service that exposes the Nginx server to the pu
 
 The tunnel URL can be obtained in the `ngrok` dashboard. Or by visiting the Ngrok service URL `http://localhost:4040/status`.
 
-> [!INFO]
+> [!NOTE]
 > The environment variable NGROK_AUTH_TOKEN must be set to use the Ngrok service.
 
 ### Runnig the project
