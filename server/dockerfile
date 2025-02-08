@@ -1,0 +1,25 @@
+FROM node:23-alpine
+
+RUN apk add --no-cache git openssh
+
+ARG GIT_USER
+ARG GIT_PASSWORD
+RUN adduser -D -s /bin/sh $GIT_USER && echo "$GIT_USER:$GIT_PASSWORD" | chpasswd
+
+RUN mkdir -p /var/repo/site.git && \
+    git init --bare /var/repo/site.git && \
+    chown -R $GIT_USER:$GIT_USER /var/repo/site.git
+
+RUN ssh-keygen -A && \
+    sed -i 's/^#PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
+
+RUN mkdir -p /var/www/domain.com && \
+	chown -R $GIT_USER:$GIT_USER /var/www/domain.com && \
+	chmod 755 /var/www/domain.com
+
+COPY post-receive /var/repo/site.git/hooks/post-receive
+
+RUN dos2unix /var/repo/site.git/hooks/post-receive && \
+	chmod +x /var/repo/site.git/hooks/post-receive
+
+CMD ["/usr/sbin/sshd", "-D"]

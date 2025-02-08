@@ -1,0 +1,37 @@
+#!/bin/sh
+TARGET="/var/www/domain.com"
+GIT_DIR="/var/repo/site.git"
+TEMP_DIR="/tmp/deploy"
+BRANCH="main"
+
+while read oldrev newrev ref
+do
+    if [[ $ref = refs/heads/$BRANCH ]];
+    then
+        echo "Ref $ref received. Deploying ${BRANCH} branch to production..."
+
+        CURRENT_BRANCH=$(git --git-dir=$GIT_DIR symbolic-ref HEAD 2>/dev/null || echo "NO_BRANCH")
+
+        if [ "$CURRENT_BRANCH" = "NO_BRANCH" ] || [ "$CURRENT_BRANCH" = "refs/heads/master" ]; then
+            echo "DEBUG: setting main branch as HEAD in server"
+            git --git-dir=$GIT_DIR symbolic-ref HEAD refs/heads/$BRANCH
+        fi
+
+		if [ -d $TEMP_DIR ]; then
+			rm -rf $TEMP_DIR
+		fi
+
+		mkdir -p $TEMP_DIR
+
+        git --work-tree=$TEMP_DIR --git-dir=$GIT_DIR checkout -f $BRANCH
+
+        cd $TEMP_DIR
+        npm install
+        npm run build
+
+        rm -rf $TARGET/*
+        cp -r $TEMP_DIR/dist/* $TARGET/
+    else
+        echo "Ref $ref received. Doing nothing: only the ${BRANCH} branch may be deployed on this server."
+    fi
+done
